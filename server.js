@@ -23,21 +23,20 @@ app.use(function(req, res, next) {
 });
 
 
-app.post('/sendLocation', function(request, response) {
+app.post('/addGrocery', function(request, response) {
 	var login = request.body.login;
-	var lat = request.body.lat;
-	var lng = request.body.lng;
+	var itemId = request.body.itemId;
 	var date = new Date();
 
 
-	db.collection('locations', function(error1, coll) {
+	db.collection('grocery', function(error1, coll) {
 
-		var id = coll.update({login:login}, {$set:{lng:lng, lat:lat, created_at: date}}, {upsert:true}, function(error2, saved) {
-			if (!login || !lng || !lat || error1) {
+		var id = coll.update({login:login}, {$set:{itemId:itemId, created_at: date}}, {upsert:true}, function(error2, saved) {
+			if (!login || !itemId || error1) {
 				response.send("{'error':'Whoops, something is wrong with your data!'}");
 			}
 			else { 
-				db.collection('locations').find({}).toArray(function(err, results){
+				db.collection('grocery').find({}).toArray(function(err, results){
 					response.send(results);
 				});
 			}
@@ -45,8 +44,8 @@ app.post('/sendLocation', function(request, response) {
 	});
 });
 
-app.get('/location.json', function(request, response) {
-	db.collection('locations').find({login:request.query.login}).toArray(function(err, results){
+app.get('/grocery.json', function(request, response) {
+	db.collection('grocery').find({login:request.query.login}).toArray(function(err, results){
 					response.send(results);
 	});
 });
@@ -57,17 +56,17 @@ app.get('/', function(request, response) {
 	var options = {
 		"sort":"created_at"
 	};
-	db.collection('locations', function(er, collection) {
+	db.collection('grocery', function(er, collection) {
 		collection.find({}, options).toArray(function(err, cursor) {
 			if (!err) {
-				indexPage += "<!DOCTYPE HTML><html><head><title>MMAP Locations</title></head><body><h1>MMAP Locations</h1>";
+				indexPage += "<!DOCTYPE HTML><html><head><title>Latest Groceries</title></head><body><h1>Latest Groceries</h1>";
 				for (var count = (cursor.length - 1); count >= 0; count--) {
-					indexPage += "<p>"+ cursor[count].login +" checked in at " + cursor[count].lat + ", " + cursor[count].lng + " on "+ cursor[count].created_at + "</p>";
+					indexPage += "<p>"+ cursor[count].login +" added grocery id# " + cursor[count].itemId + ", " + " on "+ cursor[count].created_at + "</p>";
 				}
 				indexPage += "</body></html>"
 				response.send(indexPage);
 			} else {
-				response.send('<!DOCTYPE HTML><html><head><title>MMAP</title></head><body><h1>Whoops, something went terribly wrong!</h1></body></html>');
+				response.send('<!DOCTYPE HTML><html><head><title>Grocery</title></head><body><h1>Whoops, something went terribly wrong!</h1></body></html>');
 			}
 		});
 	});
