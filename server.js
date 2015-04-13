@@ -15,21 +15,29 @@ var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
 	db = databaseConnection;
 });
 
+//enable CORS
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
-app.post('/addGrocery', function(request, response) {
+
+app.post('/sendLocation', function(request, response) {
 	var login = request.body.login;
-	var itemId = request.body.itemId;
+	var lat = request.body.lat;
+	var lng = request.body.lng;
 	var date = new Date();
 
 
-	db.collection('grocery', function(error1, coll) {
+	db.collection('locations', function(error1, coll) {
 
-		var id = coll.update({login:login}, {$set:{itemId:itemId, created_at: date}}, {upsert:true}, function(error2, saved) {
-			if (!itemId || !login || error1) {
+		var id = coll.update({login:login}, {$set:{lng:lng, lat:lat, created_at: date}}, {upsert:true}, function(error2, saved) {
+			if (!login || !lng || !lat || error1) {
 				response.send("{'error':'Whoops, something is wrong with your data!'}");
 			}
 			else { 
-				db.collection('grocery').find({}).toArray(function(err, results){
+				db.collection('locations').find({}).toArray(function(err, results){
 					response.send(results);
 				});
 			}
@@ -37,8 +45,8 @@ app.post('/addGrocery', function(request, response) {
 	});
 });
 
-app.get('/grocery.json', function(request, response) {
-	db.collection('grocery').find({login:request.query.login}).toArray(function(err, results){
+app.get('/location.json', function(request, response) {
+	db.collection('locations').find({login:request.query.login}).toArray(function(err, results){
 					response.send(results);
 	});
 });
@@ -49,12 +57,12 @@ app.get('/', function(request, response) {
 	var options = {
 		"sort":"created_at"
 	};
-	db.collection('grocery', function(er, collection) {
+	db.collection('locations', function(er, collection) {
 		collection.find({}, options).toArray(function(err, cursor) {
 			if (!err) {
-				indexPage += "<!DOCTYPE HTML><html><head><title>Groceries Added</title></head><body><h1>Groceries Added</h1>";
+				indexPage += "<!DOCTYPE HTML><html><head><title>MMAP Locations</title></head><body><h1>MMAP Locations</h1>";
 				for (var count = (cursor.length - 1); count >= 0; count--) {
-					indexPage += "<p>"+ cursor[count].login +" added " + cursor[count].itemId + " at "+ cursor[count].created_at + "</p>";
+					indexPage += "<p>"+ cursor[count].login +" checked in at " + cursor[count].lat + ", " + cursor[count].lng + " on "+ cursor[count].created_at + "</p>";
 				}
 				indexPage += "</body></html>"
 				response.send(indexPage);
