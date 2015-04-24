@@ -9,11 +9,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Mongo initialization and connect to database
-var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/nodemongoexample';
+var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL
 var MongoClient = require('mongodb').MongoClient, format = require('util').format;
 var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
 	db = databaseConnection;
 });
+
+var error_msg = { "error": "Whoops, something is wrong with your data!"};
 
 //enable CORS
 app.use(function(req, res, next) {
@@ -21,7 +23,6 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
-
 
 app.post('/addGrocery', function(request, response) {
 	var login = request.body.login;
@@ -32,7 +33,7 @@ app.post('/addGrocery', function(request, response) {
 
 		var id = coll.update({login:login}, {$set:{grocery:grocery, created_at: date}}, {upsert:true}, function(error2, saved) {
 			if (!login || !grocery || error1) {
-				response.send("{'error':'Whoops, something is wrong with your data!'}");
+				response.send(error_msg);
 			}
 			else { 
 				db.collection('grocery').find({}).toArray(function(err, results){
@@ -40,6 +41,14 @@ app.post('/addGrocery', function(request, response) {
 				});
 			}
 	    });
+	});
+});
+
+app.get('/getGrocery', function(request, response) {
+	db.collection('grocery', function(error1, coll) {
+		coll.find().toArray(function(err, results) {
+			response.send(results);
+		});
 	});
 });
 
