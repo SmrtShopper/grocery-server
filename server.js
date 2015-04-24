@@ -45,8 +45,9 @@ app.post('/addGrocery', function(request, response) {
 });
 
 app.get('/getGrocery', function(request, response) {
+	var login = request.query.login;
 	db.collection('grocery', function(error1, coll) {
-		coll.find().toArray(function(err, results) {
+		coll.find({"login": login}).toArray(function(err, results) {
 			response.send(results);
 		});
 	});
