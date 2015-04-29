@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var validator = require('validator'); // See documentation at https://github.com/chriso/validator.js
 var jquery = require('jquery');
 var requester = require('request');
+var uuid = require('uuid');
 
 var app = express();
 // See https://stackoverflow.com/questions/5710358/how-to-get-post-query-in-express-node-js
@@ -26,6 +27,10 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
+app.get('/getUID', function(request,response){
+	response.send(uuid.v1());
+	});
 
 app.post('/addGrocery', function(request, response) {
 	response.set('Content-Type', 'application/json');
