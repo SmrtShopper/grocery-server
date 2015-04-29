@@ -30,7 +30,7 @@ app.use(function(req, res, next) {
 
 app.get('/getUID', function(request,response){
 	var uid = uuid.v1();
-	db.collection('grocery').insert({login:login}, function(error2, saved) {
+	db.collection('grocery').insert({login:uid}, function(error2, saved) {
 									response.send(uid);
 								});
 	});
