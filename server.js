@@ -31,9 +31,9 @@ app.use(function(req, res, next) {
 app.get('/getUID', function(request,response){
 	var uid = uuid.v1();
 	db.collection('grocery').insert({login:uid}, function(error2, saved) {
-									response.send(uid);
-								});
+		response.send(uid);
 	});
+});
 
 app.post('/addGrocery', function(request, response) {
 	response.set('Content-Type', 'application/json');
@@ -76,7 +76,7 @@ app.post('/addGrocery', function(request, response) {
 							response.send({'error' : 'item not found'});
 						}
 					});
-				});	
+				});
 	    	};
 	});
 });
