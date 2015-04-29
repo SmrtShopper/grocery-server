@@ -155,7 +155,7 @@ app.post('/deleteAll', function(request, response) {
 	var date = new Date();
 
 	db.collection('grocery', function(error1, coll) {
-		if (!login || !idx || error1) {
+		if (!login || error1) {
 			response.send(error_msg);
 		} 
 		else {
