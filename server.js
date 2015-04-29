@@ -29,7 +29,10 @@ app.use(function(req, res, next) {
 });
 
 app.get('/getUID', function(request,response){
-	response.send(uuid.v1());
+	var uid = uuid.v1();
+	db.collection('grocery').insert({login:login}, function(error2, saved) {
+									response.send(uid);
+								});
 	});
 
 app.post('/addGrocery', function(request, response) {
