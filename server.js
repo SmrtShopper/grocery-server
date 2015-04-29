@@ -19,7 +19,7 @@ var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
 	db = databaseConnection;
 });
 
-var error_msg = { "error": "Whoops, something is wrong with your data!"};
+var error_msg = {};
 
 //enable CORS
 app.use(function(req, res, next) {
@@ -46,32 +46,103 @@ app.post('/addGrocery', function(request, response) {
 		if (!login || !grocery || error1) {
 				response.send(error_msg);
 			}
-			else { 
-				//get from nutritionix
+		else { 
+			//get from nutritionix
+			coll.find({"login": login}).toArray(function(err, results) {
+				if (results[0] != undefined && results[0].grocery != undefined) {
+					allitemstr = results[0].grocery + "\n" + grocery;
+				}
+				else {
+					allitemstr = grocery;
+				}
+				var appId = "feab83eb";
+     			var appKey = "ecc75d64bf6a77ba3f03d478d4ee943e";
+				requester.post({
+					  headers: {
+				                "X-APP-ID" : appId,
+				                "X-APP-KEY" : appKey,
+				                "Content-Type" : "text/plain"
+				              },
+					  url:     'https://api.nutritionix.com/v2/natural/',
+					  body:    allitemstr
+					}, function(error, data, body){
+						if (JSON.parse(data.body).errors == null){
+							var id = db.collection('grocery').update({login:login}, {$set:{data:body, grocery:allitemstr, created_at: date}}, {upsert:true}, function(error2, saved) {
+								response.send(data.body);
+							});
+						}
+						else {
+							//dont add unknown item
+							response.send({'error' : 'item not found'});
+						}
+					});
+				});	
+	    };
+	});
+});
+
+
+app.post('/deleteGrocery', function(request, response) {
+	response.set('Content-Type', 'application/json');
+	var login = request.body.login;
+	var idx = request.body.idx;
+	var date = new Date();
+
+	db.collection('grocery', function(error1, coll) {
+		var allitemstr;
+		if (!login || !idx || error1) {
+				response.send(error_msg);
+			}
+		else { 
+			db.collection('grocery', function(error1, coll) {
 				coll.find({"login": login}).toArray(function(err, results) {
-					if (results != undefined && results[0].grocery != undefined) {
-						allitemstr = results[0].grocery + "\n" + grocery;
+					if (results[0]){
+						input = JSON.parse(results[0].data).results;
+						if (input){
+							var allitemstr = '';
+							for (var i = 0; i < input.length; i++) {
+								if (idx != i){ //dont concat item to be removed
+							        allitemstr += input[i].parsed_query.query + "\n";
+								}
+					        }
+
+							console.log(allitemstr);
+							//get result from nutritionix
+							var appId = "feab83eb";
+			     			var appKey = "ecc75d64bf6a77ba3f03d478d4ee943e";
+							requester.post({
+								  headers: {
+							                "X-APP-ID" : appId,
+							                "X-APP-KEY" : appKey,
+							                "Content-Type" : "text/plain"
+							              },
+								  url:     'https://api.nutritionix.com/v2/natural/',
+								  body:    allitemstr
+								}, function(error, data, body){
+									if (JSON.parse(body).errors == null){
+										if (JSON.parse(body).error_message) {
+											body = "{}";
+										}
+										var id = db.collection('grocery').update({login:login}, {$set:{data:body, grocery:allitemstr, created_at: date}}, {upsert:true}, function(error2, saved) {
+											response.send(body);
+										});
+									}
+									else {
+										//dont add unknown item
+										response.send({'error' : 'item not found'});
+									}
+								});
+						}else {
+							response.send("{}");
+						}
+						
 					}
 					else {
-						allitemstr = grocery;
+						response.send("{}");
 					}
-					var appId = "feab83eb";
-	     			var appKey = "ecc75d64bf6a77ba3f03d478d4ee943e";
-					requester.post({
-						  headers: {
-					                "X-APP-ID" : appId,
-					                "X-APP-KEY" : appKey,
-					                "Content-Type" : "text/plain"
-					              },
-						  url:     'https://api.nutritionix.com/v2/natural/',
-						  body:    allitemstr
-						}, function(error, data, body){
-							var id = db.collection('grocery').update({login:login}, {$set:{data:body, grocery:allitemstr, created_at: date}}, {upsert:true}, function(error2, saved) {
-									response.send(data.body);
-								});
-						});
-					});	
-	    };
+				});
+			});
+		}
 	});
 });
 
@@ -84,7 +155,12 @@ app.get('/getGrocery', function(request, response) {
 	else {
 		db.collection('grocery', function(error1, coll) {
 			coll.find({"login": login}).toArray(function(err, results) {
-				response.send(results[0].data);
+				if (results[0]){
+					response.send(results[0].data);
+				}
+				else {
+					response.send("{}");
+				}
 			});
 		});
 	}
