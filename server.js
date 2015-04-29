@@ -44,8 +44,8 @@ app.post('/addGrocery', function(request, response) {
 	db.collection('grocery', function(error1, coll) {
 		var allitemstr;
 		if (!login || !grocery || error1) {
-				response.send(error_msg);
-			}
+			response.send(error_msg);
+		}
 		else { 
 			//get from nutritionix
 			coll.find({"login": login}).toArray(function(err, results) {
@@ -77,10 +77,9 @@ app.post('/addGrocery', function(request, response) {
 						}
 					});
 				});	
-	    };
+	    	};
 	});
 });
-
 
 app.post('/deleteGrocery', function(request, response) {
 	response.set('Content-Type', 'application/json');
@@ -91,8 +90,8 @@ app.post('/deleteGrocery', function(request, response) {
 	db.collection('grocery', function(error1, coll) {
 		var allitemstr;
 		if (!login || !idx || error1) {
-				response.send(error_msg);
-			}
+			response.send(error_msg);
+		}
 		else { 
 			db.collection('grocery', function(error1, coll) {
 				coll.find({"login": login}).toArray(function(err, results) {
@@ -104,12 +103,12 @@ app.post('/deleteGrocery', function(request, response) {
 								if (idx != i){ //dont concat item to be removed
 							        allitemstr += input[i].parsed_query.query + "\n";
 								}
-					        }
+					        	}
 
 							console.log(allitemstr);
 							//get result from nutritionix
 							var appId = "feab83eb";
-			     			var appKey = "ecc75d64bf6a77ba3f03d478d4ee943e";
+			     				var appKey = "ecc75d64bf6a77ba3f03d478d4ee943e";
 							requester.post({
 								  headers: {
 							                "X-APP-ID" : appId,
@@ -131,7 +130,7 @@ app.post('/deleteGrocery', function(request, response) {
 										//dont add unknown item
 										response.send({'error' : 'item not found'});
 									}
-								});
+							});
 						}else {
 							response.send("{}");
 						}
@@ -141,6 +140,23 @@ app.post('/deleteGrocery', function(request, response) {
 						response.send("{}");
 					}
 				});
+			});
+		}
+	});
+});
+
+app.post('/deleteAll', function(request, response) {
+	response.set('Content-Type', 'application/json');
+	var login = request.body.login;
+	var date = new Date();
+
+	db.collection('grocery', function(error1, coll) {
+		if (!login || !idx || error1) {
+			response.send(error_msg);
+		} 
+		else {
+			var id = db.collection('grocery').update({login:login}, {$set:{data:"{}", grocery:"", created_at: date}}, {upsert:true}, function(error2, saved) {
+				response.send("{}");
 			});
 		}
 	});
