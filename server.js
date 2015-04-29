@@ -49,8 +49,8 @@ app.post('/addGrocery', function(request, response) {
 		else { 
 			//get from nutritionix
 			coll.find({"login": login}).toArray(function(err, results) {
-				if (results[0] != undefined && results[0].grocery != undefined) {
-					allitemstr = results[0].grocery + "\n" + grocery;
+				if (results[0] != undefined && results[0].grocery != undefined && results[0].grocery != '\n') {
+					allitemstr = grocery + '\n' + results[0].grocery;
 				}
 				else {
 					allitemstr = grocery;
@@ -101,9 +101,13 @@ app.post('/deleteGrocery', function(request, response) {
 							var allitemstr = '';
 							for (var i = 0; i < input.length; i++) {
 								if (idx != i){ //dont concat item to be removed
-							        allitemstr += input[i].parsed_query.query + "\n";
+									if (allitemstr != undefined || '\n') {
+										allitemstr = input[i].parsed_query.query + '\n' + allitemstr;
+									}else {
+										allitemstr = input[i].parsed_query.query;
+									}
 								}
-					        	}
+					        }
 
 							console.log(allitemstr);
 							//get result from nutritionix
