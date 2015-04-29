@@ -50,11 +50,9 @@ app.post('/addGrocery', function(request, response) {
 				//get from nutritionix
 				coll.find({"login": login}).toArray(function(err, results) {
 					if (results != undefined && results[0].grocery != undefined) {
-						console.log("NOT UNDEFINED");
 						allitemstr = results[0].grocery + "\n" + grocery;
 					}
 					else {
-						console.log("NEW STRING");
 						allitemstr = grocery;
 					}
 					var appId = "feab83eb";
