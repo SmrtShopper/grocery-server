@@ -19,7 +19,7 @@ var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
 	db = databaseConnection;
 });
 
-var error_msg = {};
+var error_msg = "{}";
 
 //enable CORS
 app.use(function(req, res, next) {
