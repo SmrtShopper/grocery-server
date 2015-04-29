@@ -36,9 +36,32 @@ app.post('/addGrocery', function(request, response) {
 				response.send(error_msg);
 			}
 			else { 
-				db.collection('grocery').find({}).toArray(function(err, results){
-					response.send(results);
-				});
+				//get from nutritionix
+				var appId = "feab83eb";
+     			var appKey = "ecc75d64bf6a77ba3f03d478d4ee943e";
+				$.ajax({
+			            type: "POST",
+			            url: "https://api.nutritionix.com/v2/natural/",
+			            data: grocery,
+			            headers:
+			              {
+			                "X-APP-ID" : appId,
+			                "X-APP-KEY" : appKey,
+			                "Content-Type" : "text/plain"
+			              },
+			            dataType: "text"
+			          })
+			      .done (function(response, status){
+			        response.send(response);
+			      })
+			      .fail (function (response,status){
+			         response.send("NUTRTIONIX API ERROR");
+			      });
+
+
+				// db.collection('grocery').find({}).toArray(function(err, results){
+				// 	response.send(results);
+				// });
 			}
 	    });
 	});
