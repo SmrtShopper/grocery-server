@@ -211,24 +211,23 @@ app.get('/sendSMS', function(request, response) {
 				response.send(error_msg);
 	}
 	else {
-			db.collection('grocery', function(error1, coll) {
-				coll.find({"login": login}).toArray(function(err, results) {
-					if (results[0] != undefined && results[0].grocery != undefined && results[0].grocery != '\n') {
-							allitemstr = grocery + '\n' + results[0].grocery;
-					}
-					allitemstr += '\n' + url;
-					requester.post({
-							  url:     "http://textbelt.com/text",
-							  body:    allitemstr
-							}, function(error, data){
-								if (JSON.parse(data).success == true){
-									response.send("success");
-								}else {
-									response.send("failure");
-								}
-							});
-					});
-			});
+			allitemstr = ''
+			db.collection('grocery').find({"login": login}).toArray(function(err, results) {
+				if (results[0] != undefined && results[0].grocery != undefined && results[0].grocery != '\n') {
+						allitemstr = grocery + '\n' + results[0].grocery;
+				}
+				allitemstr += '\n' + url;
+				requester.post({
+						  url:     "http://textbelt.com/text",
+						  form:    {number:phone, message:allitemstr}
+						}, function(error, data){
+							if (JSON.parse(data.body).success == true){
+								response.send("success");
+							}else {
+								response.send("failure");
+							}
+						});
+				});
 	    }
 });
 
