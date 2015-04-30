@@ -215,7 +215,7 @@ app.get('/sendSMS', function(request, response) {
 			db.collection('grocery', function(error1, coll) {
 			coll.find({"login": login}).toArray(function(err, results) {
 				if (results[0] != undefined && results[0].grocery != undefined && results[0].grocery != '\n') {
-						allitemstr = grocery + '\n' + results[0].grocery;
+						allitemstr = results[0].grocery;
 				}
 				allitemstr += '\n' + url;
 				requester.post({
