@@ -211,8 +211,9 @@ app.get('/sendSMS', function(request, response) {
 				response.send(error_msg);
 	}
 	else {
-			allitemstr = ''
-			db.collection('grocery').find({"login": login}).toArray(function(err, results) {
+			allitemstr = '';
+			db.collection('grocery', function(error1, coll) {
+			coll.find({"login": login}).toArray(function(err, results) {
 				if (results[0] != undefined && results[0].grocery != undefined && results[0].grocery != '\n') {
 						allitemstr = grocery + '\n' + results[0].grocery;
 				}
@@ -228,6 +229,7 @@ app.get('/sendSMS', function(request, response) {
 							}
 						});
 				});
+			});
 	    }
 });
 
