@@ -28,6 +28,22 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.get('/checkUID', function(request,response){
+	response.set('Content-Type', 'text/plain');
+	var uid = request.query.login;
+	if (!uid) {
+			response.send("0"); //doesn't exists
+	}
+	else {
+		docs = db.collection('grocery').find({login:uid});
+		docs.count(function(error, num) {
+			response.send(num.toString()); //1 if exists, 0 if does not
+		});
+
+	}
+	
+});
+
 app.get('/getUID', function(request,response){
 	var uid = uuid.v1();
 	db.collection('grocery').insert({login:uid}, function(error2, saved) {
