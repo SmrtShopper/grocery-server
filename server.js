@@ -202,4 +202,34 @@ app.get('/getGrocery', function(request, response) {
 	}
 });
 
+app.get('/sendSMS', function(request, response) {
+	response.set('Content-Type', 'application/json');
+	var login = request.query.login;
+	var phone = request.query.phone;
+	var url = request.query.url;
+	if (!login || !phone || !url) {
+				response.send(error_msg);
+	}
+	else {
+			db.collection('grocery', function(error1, coll) {
+				coll.find({"login": login}).toArray(function(err, results) {
+					if (results[0] != undefined && results[0].grocery != undefined && results[0].grocery != '\n') {
+							allitemstr = grocery + '\n' + results[0].grocery;
+					}
+					allitemstr += '\n' + url;
+					requester.post({
+							  url:     "http://textbelt.com/text",
+							  body:    allitemstr
+							}, function(error, data){
+								if (JSON.parse(data).success == true){
+									response.send("success");
+								}else {
+									response.send("failure");
+								}
+							});
+					});
+			});
+	    }
+});
+
 app.listen(process.env.PORT || 3000);
