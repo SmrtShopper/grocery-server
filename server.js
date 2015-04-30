@@ -191,7 +191,7 @@ app.get('/getGrocery', function(request, response) {
 	else {
 		db.collection('grocery', function(error1, coll) {
 			coll.find({"login": login}).toArray(function(err, results) {
-				if (results[0]){
+				if (results[0] && results[0].data){
 					response.send(results[0].data);
 				}
 				else {
