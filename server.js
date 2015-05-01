@@ -5,12 +5,10 @@ var validator = require('validator'); // See documentation at https://github.com
 var jquery = require('jquery');
 var requester = require('request');
 var uuid = require('uuid');
-expressSanitized = require('express-sanitized');
  
 var app = express();
 // See https://stackoverflow.com/questions/5710358/how-to-get-post-query-in-express-node-js
 app.use(bodyParser.json());
-app.use(expressSanitized()); 
 // See https://stackoverflow.com/questions/25471856/express-throws-error-as-body-parser-deprecated-undefined-extended
 app.use(bodyParser.urlencoded({ extended: true }));
 
